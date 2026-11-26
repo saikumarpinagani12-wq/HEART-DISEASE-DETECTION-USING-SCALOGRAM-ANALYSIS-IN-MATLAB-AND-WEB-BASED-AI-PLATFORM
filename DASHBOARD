@@ -1,0 +1,647 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#050b12">
+    <title>HeartCare AI | Dashboard</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
+</head>
+
+<body class="hc-dashboard">
+
+<div class="hc-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="hc-sidebar">
+
+        <a href="{{ url_for('dashboard') }}" class="hc-brand">
+            <span class="brand-heart">♥</span>
+            <span>HeartCare <b>AI</b></span>
+        </a>
+
+        <div class="sidebar-label">WORKSPACE</div>
+
+        <a href="{{ url_for('dashboard') }}" class="side-link active">
+            <span>▦</span> Dashboard
+        </a>
+
+        <a href="#history" class="side-link">
+            <span>◷</span> Analysis History
+        </a>
+
+        <a href="#upload" class="side-link">
+            <span>＋</span> New ECG Analysis
+        </a>
+
+        <div class="sidebar-label">AI PLATFORM</div>
+
+        <a href="#model" class="side-link">
+            <span>◈</span> AI Model
+        </a>
+
+        <a href="#performance" class="side-link">
+            <span>⌁</span> Performance
+        </a>
+
+        <div class="sidebar-bottom">
+            <div class="sidebar-profile">
+                <div class="profile-avatar">
+                    {{ current_user.username[0]|upper }}
+                </div>
+                <div>
+                    <strong>{{ current_user.username }}</strong>
+                    <small>Research User</small>
+                </div>
+            </div>
+
+            <form action="{{ url_for('logout') }}" method="POST">
+                <button class="logout-button" type="submit">
+                    ↪ Sign Out
+                </button>
+            </form>
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN CONTENT -->
+    <main class="hc-main">
+
+        <!-- TOP NAVIGATION -->
+        <header class="hc-topbar">
+
+            <div>
+                <div class="top-eyebrow">HEARTCARE AI / OVERVIEW</div>
+                <h2>ECG Intelligence Dashboard</h2>
+            </div>
+
+            <div class="top-actions">
+                <div class="system-status">
+                    <span></span> AI SYSTEM READY
+                </div>
+
+                <div class="top-avatar">
+                    {{ current_user.username[0]|upper }}
+                </div>
+            </div>
+
+        </header>
+
+
+        <!-- WELCOME -->
+        <section class="welcome-section">
+            <div>
+                <p class="green-eyebrow">WELCOME BACK</p>
+                <h1>Hello, {{ current_user.username }} 👋</h1>
+                <p>Monitor ECG signals and explore your AI analysis results.</p>
+            </div>
+
+            <a href="#upload" class="hc-primary-button">
+                + New ECG Analysis
+            </a>
+        </section>
+
+
+        <!-- STATISTICS -->
+        <section class="stats-grid">
+
+            <div class="stat-card">
+                <div class="stat-top">
+                    <span>Total Analyses</span>
+                    <span class="stat-icon cyan">⌁</span>
+                </div>
+
+                <h2>{{ total }}</h2>
+                <small>Saved ECG analyses</small>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-top">
+                    <span>Normal Results</span>
+                    <span class="stat-icon green">♥</span>
+                </div>
+
+                <h2>{{ normal_count }}</h2>
+                <small>Classified as Normal</small>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-top">
+                    <span>Abnormal Results</span>
+                    <span class="stat-icon orange">⚠</span>
+                </div>
+
+                <h2>{{ abnormal_count }}</h2>
+                <small>Flagged by the model</small>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-top">
+                    <span>AI Model</span>
+                    <span class="stat-icon purple">◈</span>
+                </div>
+
+                <h2 class="model-name">ResNet-18</h2>
+                <small>CWT-based ECG classification</small>
+            </div>
+
+        </section>
+
+
+        <!-- HEART VISUALIZATION -->
+        <section class="hero-grid">
+
+            <div class="heart-panel">
+
+                <div class="panel-heading">
+                    <div>
+                        <span class="green-eyebrow">AI VISUALIZATION</span>
+                        <h2>Heart Intelligence</h2>
+                    </div>
+
+                    <span class="live-indicator">
+                        <i></i> VISUAL
+                    </span>
+                </div>
+
+                <div class="heart-stage">
+
+                    <div class="heart-ring ring-one"></div>
+                    <div class="heart-ring ring-two"></div>
+                    <div class="heart-ring ring-three"></div>
+
+                    <svg class="heart-graphic"
+                         viewBox="0 0 300 300"
+                         xmlns="http://www.w3.org/2000/svg">
+
+                        <defs>
+                            <linearGradient id="heartGradient"
+                                x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stop-color="#75fff0"/>
+                                <stop offset="50%" stop-color="#13d9c2"/>
+                                <stop offset="100%" stop-color="#087aab"/>
+                            </linearGradient>
+
+                            <filter id="heartGlow">
+                                <feGaussianBlur stdDeviation="7"
+                                                result="blur"/>
+                                <feMerge>
+                                    <feMergeNode in="blur"/>
+                                    <feMergeNode in="SourceGraphic"/>
+                                </feMerge>
+                            </filter>
+                        </defs>
+
+                        <path
+                            d="M150 252
+                               C125 226 48 171 48 108
+                               C48 56 108 35 150 91
+                               C192 35 252 56 252 108
+                               C252 171 175 226 150 252Z"
+                            fill="url(#heartGradient)"
+                            fill-opacity=".13"
+                            stroke="url(#heartGradient)"
+                            stroke-width="5"
+                            filter="url(#heartGlow)"/>
+
+                        <path
+                            d="M150 91
+                               C140 116 153 134 137 153
+                               C126 167 113 181 120 202
+                               M150 91
+                               C169 112 164 134 179 151
+                               C191 167 186 181 180 199
+                               M150 128
+                               C138 143 143 162 150 177
+                               C159 193 152 208 150 223"
+                            fill="none"
+                            stroke="#55fff0"
+                            stroke-width="4"
+                            stroke-linecap="round"
+                            filter="url(#heartGlow)"/>
+
+                        <path
+                            d="M96 123 L120 123 L134 105
+                               L149 150 L165 122
+                               L180 122 L196 110"
+                            fill="none"
+                            stroke="#c2fff9"
+                            stroke-width="3"
+                            stroke-linejoin="round"/>
+
+                    </svg>
+
+                    <div class="heart-caption">
+                        <span></span> AI HEART VISUALIZATION
+                    </div>
+
+                </div>
+
+                <div class="heart-footer">
+                    <div>
+                        <small>Deep Learning Architecture</small>
+                        <strong>ResNet-18</strong>
+                    </div>
+
+                    <div>
+                        <small>Signal Transformation</small>
+                        <strong>Continuous Wavelet Transform</strong>
+                    </div>
+                </div>
+
+            </div>
+
+
+            <!-- MODEL PANEL -->
+            <div class="model-panel" id="model">
+
+                <div class="panel-heading">
+                    <div>
+                        <span class="green-eyebrow">INTELLIGENCE ENGINE</span>
+                        <h2>AI Model Overview</h2>
+                    </div>
+                    <span class="model-status">ACTIVE</span>
+                </div>
+
+                <div class="model-info">
+                    <div class="model-icon">◈</div>
+
+                    <div>
+                        <h3>ResNet-18</h3>
+                        <p>ECG Classification Network</p>
+                    </div>
+                </div>
+
+                <div class="model-detail">
+                    <span>Input Representation</span>
+                    <strong>CWT Scalogram</strong>
+                </div>
+
+                <div class="model-detail">
+                    <span>Image Resolution</span>
+                    <strong>224 × 224</strong>
+                </div>
+
+                <div class="model-detail">
+                    <span>Classification</span>
+                    <strong>Normal / Abnormal</strong>
+                </div>
+
+                <div class="model-detail">
+                    <span>Analysis Method</span>
+                    <strong>Deep Learning</strong>
+                </div>
+
+                <div class="model-note">
+                    Model scores are experimental outputs, not clinical diagnoses.
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ANALYTICS -->
+        <section class="analytics-grid" id="performance">
+
+            <div class="chart-panel">
+
+                <div class="panel-heading">
+                    <div>
+                        <span class="green-eyebrow">ANALYSIS OVERVIEW</span>
+                        <h2>ECG Classification Distribution</h2>
+                    </div>
+                </div>
+
+                <div class="distribution-chart">
+
+                    <div class="distribution-item">
+                        <div class="distribution-heading">
+                            <span><i class="dot-green"></i> Normal</span>
+                            <strong>{{ normal_count }}</strong>
+                        </div>
+
+                        <div class="distribution-track">
+                            <div class="distribution-green"></div>
+                        </div>
+                    </div>
+
+                    <div class="distribution-item">
+                        <div class="distribution-heading">
+                            <span><i class="dot-orange"></i> Abnormal</span>
+                            <strong>{{ abnormal_count }}</strong>
+                        </div>
+
+                        <div class="distribution-track">
+                            <div class="distribution-orange"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <p class="chart-caption">
+                    Distribution of your saved ECG classifications.
+                </p>
+
+            </div>
+
+
+            <div class="activity-panel">
+
+                <div class="panel-heading">
+                    <div>
+                        <span class="green-eyebrow">WORKSPACE</span>
+                        <h2>Quick Actions</h2>
+                    </div>
+                </div>
+
+                <a href="#upload" class="quick-action">
+                    <span class="action-icon cyan">＋</span>
+                    <span>
+                        <strong>Upload ECG</strong>
+                        <small>Start a new analysis</small>
+                    </span>
+                    <b>→</b>
+                </a>
+
+                <a href="#history" class="quick-action">
+                    <span class="action-icon green">◷</span>
+                    <span>
+                        <strong>View History</strong>
+                        <small>Review saved results</small>
+                    </span>
+                    <b>→</b>
+                </a>
+
+                <a href="#model" class="quick-action">
+                    <span class="action-icon purple">◈</span>
+                    <span>
+                        <strong>Model Information</strong>
+                        <small>Explore the AI architecture</small>
+                    </span>
+                    <b>→</b>
+                </a>
+
+            </div>
+
+        </section>
+
+
+        <!-- UPLOAD -->
+        <section class="upload-panel" id="upload">
+
+            <div class="upload-content">
+                <span class="green-eyebrow">AI-POWERED ECG ANALYSIS</span>
+
+                <h2>Start a New ECG Analysis</h2>
+
+                <p>
+                    Upload your ECG signal in CSV or TXT format.
+                    The system generates a CWT scalogram and
+                    classifies it using ResNet-18.
+                </p>
+
+                <form action="{{ url_for('predict') }}"
+                      method="POST"
+                      enctype="multipart/form-data">
+
+                    <label class="file-label" for="ecgFile">
+                        <span>＋</span>
+                        <strong id="fileName">
+                            Choose ECG CSV or TXT file
+                        </strong>
+                    </label>
+
+                    <input type="file"
+                           name="ecg_file"
+                           id="ecgFile"
+                           accept=".csv,.txt"
+                           required>
+
+                    <button type="submit" class="hc-primary-button">
+                        Analyze ECG →
+                    </button>
+
+                </form>
+
+                <small class="upload-help">
+                    Supported formats: CSV, TXT | Maximum size: 20 MB
+                </small>
+
+            </div>
+
+            <div class="upload-decoration">
+                <div class="upload-pulse">
+                    ♥
+                </div>
+                <div class="pulse-line">
+                    ━━━━━╱╲━━╱╲━━━━━━
+                </div>
+                <small>ECG SIGNAL PROCESSING</small>
+            </div>
+
+        </section>
+
+
+        <!-- HISTORY -->
+        <section class="history-panel" id="history">
+
+            <div class="panel-heading">
+                <div>
+                    <span class="green-eyebrow">YOUR RECORDS</span>
+                    <h2>Recent ECG Analyses</h2>
+                </div>
+
+                <span class="history-count">
+                    {{ total }} TOTAL
+                </span>
+            </div>
+
+            {% if history %}
+
+            <div class="table-wrap">
+
+                <table class="hc-table">
+
+                    <thead>
+                        <tr>
+                            <th>ECG FILE</th>
+                            <th>CLASSIFICATION</th>
+                            <th>CONFIDENCE</th>
+                            <th>DATE</th>
+                            <th>ACTION</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                    {% for item in history %}
+
+                        <tr>
+
+                            <td>
+                                <strong>{{ item['filename'] }}</strong>
+                            </td>
+
+                            <td>
+                                <span class="result-tag
+                                {% if item['predicted_class']|lower == 'normal' %}
+                                    tag-normal
+                                {% else %}
+                                    tag-abnormal
+                                {% endif %}">
+                                    {{ item['predicted_class'] }}
+                                </span>
+                            </td>
+
+                            <td>
+                                {{ item['confidence'] }}%
+                            </td>
+
+                            <td>
+                                {{ item['created_at'] }}
+                            </td>
+
+                            <td>
+                                <a class="view-link"
+                                   href="{{ url_for('history_detail',
+                                                    analysis_id=item['id']) }}">
+                                    View →
+                                </a>
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            {% else %}
+
+            <div class="empty-history">
+                <div>◷</div>
+                <h3>No ECG analyses yet</h3>
+                <p>Upload your first ECG file to see your results here.</p>
+                <a href="#upload" class="hc-primary-button">
+                    Upload ECG
+                </a>
+            </div>
+
+            {% endif %}
+
+        </section>
+
+
+        <footer class="hc-footer">
+            <span>♥ HeartCare AI</span>
+            <span>Intelligent ECG Signal Analysis Using Deep Learning</span>
+            <span>Academic Research Prototype | 2026</span>
+        </footer>
+
+    </main>
+
+</div>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const fileInput = document.getElementById("ecgFile");
+    const fileName = document.getElementById("fileName");
+
+    if (fileInput && fileName) {
+        fileInput.addEventListener("change", function () {
+
+            if (this.files.length > 0) {
+                fileName.textContent = this.files[0].name;
+            } else {
+                fileName.textContent = "Choose ECG CSV or TXT file";
+            }
+
+        });
+    }
+
+});
+</script>
+
+</body>
+</html>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    // Reveal dashboard sections as they enter the screen
+    const revealElements = document.querySelectorAll(
+        ".hc-main > section, .hc-footer, .stat-card, .heart-panel, .model-panel"
+    );
+
+    revealElements.forEach(function (element, index) {
+        element.classList.add("hc-reveal");
+        element.style.transitionDelay = (index % 5) * 90 + "ms";
+    });
+
+    if ("IntersectionObserver" in window) {
+        const observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add("is-visible");
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, {
+            threshold: 0.12
+        });
+
+        revealElements.forEach(function (element) {
+            observer.observe(element);
+        });
+    } else {
+        revealElements.forEach(function (element) {
+            element.classList.add("is-visible");
+        });
+    }
+
+    // Animate numeric dashboard statistics
+    document.querySelectorAll(".stat-card h2").forEach(function (element) {
+        const finalValue = element.textContent.trim();
+
+        if (!/^\d+$/.test(finalValue)) return;
+
+        const target = Number(finalValue);
+        const duration = 1200;
+        const startTime = performance.now();
+
+        function updateCounter(currentTime) {
+            const progress = Math.min(
+                (currentTime - startTime) / duration,
+                1
+            );
+
+            const easedProgress = 1 - Math.pow(1 - progress, 3);
+            element.textContent = Math.floor(target * easedProgress);
+
+            if (progress < 1) {
+                requestAnimationFrame(updateCounter);
+            } else {
+                element.textContent = target;
+            }
+        }
+
+        element.textContent = "0";
+        requestAnimationFrame(updateCounter);
+    });
+
+});
+</script>
