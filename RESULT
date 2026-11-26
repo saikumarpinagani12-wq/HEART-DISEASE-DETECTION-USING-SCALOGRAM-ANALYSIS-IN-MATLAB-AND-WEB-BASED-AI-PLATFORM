@@ -1,0 +1,482 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#06100a">
+
+    <title>ECG Analysis Report | HeartCare AI</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
+</head>
+
+<body class="hc-result-page">
+
+<div class="result-container">
+
+    <!-- TOP NAVIGATION -->
+    <header class="result-navbar">
+
+        <a href="{{ url_for('home') }}" class="result-logo">
+            <span>♥</span> HeartCare <b>AI</b>
+        </a>
+
+        <div class="result-nav-right">
+            <span class="analysis-status">
+                <i></i> ANALYSIS COMPLETED
+            </span>
+
+            <a href="{{ url_for('dashboard') }}"
+               class="result-nav-link">
+                Dashboard ↗
+            </a>
+        </div>
+
+    </header>
+
+
+    <!-- PAGE HEADING -->
+    <section class="result-heading">
+
+        <div>
+            <div class="result-eyebrow">
+                HEARTCARE AI / ANALYSIS REPORT
+            </div>
+
+            <h1>ECG Analysis <span>Report</span></h1>
+
+            <p>
+                AI-powered ECG signal classification and
+                time-frequency analysis.
+            </p>
+        </div>
+
+        <div class="report-date">
+            <span>ANALYSIS FILE</span>
+            <strong>{{ filename }}</strong>
+        </div>
+
+    </section>
+
+
+    <!-- PREDICTION OVERVIEW -->
+    <section class="result-hero-card">
+
+        <div class="prediction-main">
+
+            <div class="prediction-kicker">
+                <span class="prediction-indicator"></span>
+                MODEL PREDICTION
+            </div>
+
+            <div class="prediction-label">
+                Classification Result
+            </div>
+
+            <div class="prediction-result
+                {% if predicted_class|lower == 'normal' %}
+                    prediction-normal
+                {% else %}
+                    prediction-abnormal
+                {% endif %}">
+                {{ predicted_class }}
+            </div>
+
+            <p class="prediction-explanation">
+                The ResNet-18 model classified the uploaded
+                ECG signal using its generated CWT scalogram.
+            </p>
+
+            <div class="confidence-row">
+                <span>Model confidence</span>
+                <strong>{{ confidence|float|round(2) }}%</strong>
+            </div>
+
+            <progress class="confidence-progress"
+                      value="{{ confidence|float }}"
+                      max="100">
+                {{ confidence }}%
+            </progress>
+
+        </div>
+
+
+        <div class="prediction-side">
+
+            <div class="prediction-side-label">
+                ANALYSIS SUMMARY
+            </div>
+
+            <div class="summary-item">
+                <span class="summary-icon">⌁</span>
+                <div>
+                    <small>Signal Processing</small>
+                    <strong>ECG Signal</strong>
+                </div>
+            </div>
+
+            <div class="summary-item">
+                <span class="summary-icon">▦</span>
+                <div>
+                    <small>Transformation</small>
+                    <strong>CWT Scalogram</strong>
+                </div>
+            </div>
+
+            <div class="summary-item">
+                <span class="summary-icon">◈</span>
+                <div>
+                    <small>AI Architecture</small>
+                    <strong>ResNet-18</strong>
+                </div>
+            </div>
+
+            <div class="summary-note">
+                Academic research output. Not a clinical diagnosis.
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- CLASSIFICATION SCORES -->
+    <section class="result-section">
+
+        <div class="section-title-row">
+            <div>
+                <div class="result-eyebrow">PREDICTION ANALYTICS</div>
+                <h2>Classification Distribution</h2>
+                <p>Model output scores for the two classes.</p>
+            </div>
+
+            <span class="section-tag">AI OUTPUT</span>
+        </div>
+
+
+        <div class="score-cards">
+
+            <article class="score-card score-normal">
+
+                <div class="score-card-heading">
+                    <span class="score-symbol">♥</span>
+                    <span>NORMAL CLASS</span>
+                </div>
+
+                <div class="score-number">
+                    {{ normal_percentage|float|round(2) }}<small>%</small>
+                </div>
+
+                <progress class="score-progress"
+                          value="{{ normal_percentage|float }}"
+                          max="100">
+                    {{ normal_percentage }}%
+                </progress>
+
+                <div class="score-bottom">
+                    <span>Normal score</span>
+                    <strong>{{ normal_percentage|float|round(2) }}%</strong>
+                </div>
+
+            </article>
+
+
+            <article class="score-card score-abnormal">
+
+                <div class="score-card-heading">
+                    <span class="score-symbol">!</span>
+                    <span>ABNORMAL CLASS</span>
+                </div>
+
+                <div class="score-number">
+                    {{ abnormal_percentage|float|round(2) }}<small>%</small>
+                </div>
+
+                <progress class="score-progress"
+                          value="{{ abnormal_percentage|float }}"
+                          max="100">
+                    {{ abnormal_percentage }}%
+                </progress>
+
+                <div class="score-bottom">
+                    <span>Abnormal score</span>
+                    <strong>{{ abnormal_percentage|float|round(2) }}%</strong>
+                </div>
+
+            </article>
+
+        </div>
+
+    </section>
+
+
+    <!-- SIGNAL INFORMATION -->
+    <section class="result-section">
+
+        <div class="section-title-row">
+            <div>
+                <div class="result-eyebrow">INPUT DATA</div>
+                <h2>ECG Signal Information</h2>
+                <p>Technical details of the uploaded signal.</p>
+            </div>
+        </div>
+
+
+        <div class="signal-grid">
+
+            <div class="signal-info-card">
+                <span class="signal-info-icon">▤</span>
+                <small>Uploaded File</small>
+                <strong class="file-name">{{ filename }}</strong>
+            </div>
+
+            <div class="signal-info-card">
+                <span class="signal-info-icon">⌁</span>
+                <small>Sampling Rate</small>
+                <strong>{{ sampling_rate }} Hz</strong>
+            </div>
+
+            <div class="signal-info-card">
+                <span class="signal-info-icon">◉</span>
+                <small>Number of Samples</small>
+                <strong>{{ samples }}</strong>
+            </div>
+
+            <div class="signal-info-card">
+                <span class="signal-info-icon">◷</span>
+                <small>Signal Duration</small>
+                <strong>{{ duration }} sec</strong>
+            </div>
+
+            <div class="signal-info-card">
+                <span class="signal-info-icon">◈</span>
+                <small>Deep Learning Model</small>
+                <strong>ResNet-18</strong>
+            </div>
+
+            <div class="signal-info-card">
+                <span class="signal-info-icon">▦</span>
+                <small>Transformation</small>
+                <strong>CWT</strong>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- SCALOGRAM -->
+  
+<!-- CURRENT UPLOAD CWT SCALOGRAM -->
+
+<section class="result-section">
+
+    <div class="section-title-row">
+        <div>
+            <div class="result-eyebrow">CURRENT ECG VISUALIZATION</div>
+            <h2>CWT Scalogram of Uploaded ECG</h2>
+            <p>
+                Time-frequency representation generated
+                from the current uploaded ECG signal.
+            </p>
+        </div>
+
+        <span class="section-tag">CWT OUTPUT</span>
+    </div>
+
+    <div class="visualization-card">
+
+        {% if scalogram %}
+
+            <div class="visualization-image-wrap">
+                <img src="{{ scalogram }}"
+                     class="result-scalogram"
+                     alt="CWT scalogram of uploaded ECG">
+            </div>
+
+        {% else %}
+
+            <div class="empty-visualization">
+                Scalogram is not available.
+            </div>
+
+        {% endif %}
+
+        <div class="visualization-caption">
+            <span>GENERATED FROM CURRENT ECG FILE</span>
+            <span>Continuous Wavelet Transform</span>
+        </div>
+
+    </div>
+
+</section>
+
+
+
+    <!-- TRAINING PERFORMANCE -->
+   
+<!-- UPLOADED ECG SIGNAL ANALYSIS -->
+
+<section class="result-section">
+
+    <div class="section-title-row">
+        <div>
+            <div class="result-eyebrow">CURRENT UPLOAD</div>
+            <h2>Uploaded ECG Signal Analysis</h2>
+            <p>Technical information from the current ECG file.</p>
+        </div>
+        <span class="section-tag">INPUT DATA</span>
+    </div>
+
+    <div class="training-grid">
+
+        <div class="training-card">
+            <small>UPLOADED FILE</small>
+            <strong>{{ filename }}</strong>
+            <span>Current ECG dataset</span>
+        </div>
+
+        <div class="training-card">
+            <small>SAMPLING RATE</small>
+            <strong>{{ sampling_rate }} Hz</strong>
+            <span>Signal sampling frequency</span>
+        </div>
+
+        <div class="training-card">
+            <small>TOTAL SAMPLES</small>
+            <strong>{{ samples }}</strong>
+            <span>Number of ECG data points</span>
+        </div>
+
+        <div class="training-card">
+            <small>SIGNAL DURATION</small>
+            <strong>{{ duration }} sec</strong>
+            <span>Duration of uploaded signal</span>
+        </div>
+
+    </div>
+
+</section>
+
+
+
+    <!-- CLASSIFICATION REPORT -->
+   
+<!-- CURRENT ECG PREDICTION SUMMARY -->
+
+<section class="result-section">
+
+    <div class="section-title-row">
+        <div>
+            <div class="result-eyebrow">CURRENT MODEL OUTPUT</div>
+            <h2>ECG Prediction Summary</h2>
+            <p>Classification result for the uploaded ECG signal.</p>
+        </div>
+
+        <span class="section-tag">PREDICTION</span>
+    </div>
+
+    <div class="training-grid">
+
+        <div class="training-card">
+            <small>PREDICTED CLASS</small>
+            <strong>{{ predicted_class }}</strong>
+            <span>ResNet-18 classification</span>
+        </div>
+
+        <div class="training-card">
+            <small>MODEL CONFIDENCE</small>
+            <strong>{{ confidence|float|round(2) }}%</strong>
+            <span>Model output score</span>
+        </div>
+
+        <div class="training-card">
+            <small>NORMAL SCORE</small>
+            <strong>{{ normal_percentage|float|round(2) }}%</strong>
+            <span>Normal class score</span>
+        </div>
+
+        <div class="training-card">
+            <small>ABNORMAL SCORE</small>
+            <strong>{{ abnormal_percentage|float|round(2) }}%</strong>
+            <span>Abnormal class score</span>
+        </div>
+
+    </div>
+
+    <div class="summary-note" style="margin-top:20px;">
+        These are model-generated outputs for this uploaded ECG.
+        They are not clinically validated probabilities or a medical diagnosis.
+    </div>
+
+</section>
+
+    <!-- DISCLAIMER -->
+    <section class="result-disclaimer">
+
+        <div class="disclaimer-icon">ⓘ</div>
+
+        <div>
+            <strong>Research Disclaimer</strong>
+
+            <p>
+                HeartCare AI is an academic research prototype.
+                Classification scores represent model outputs
+                and are not clinically validated probabilities.
+                This platform is not intended for medical diagnosis,
+                treatment decisions or emergency use.
+            </p>
+        </div>
+
+    </section>
+
+
+   <!-- ACTION BUTTONS -->
+<section class="result-actions">
+
+    <a href="{{ url_for('dashboard') }}"
+       class="action-secondary">
+        ← Back to Dashboard
+    </a>
+
+    <a href="{{ url_for('download_report', analysis_id=analysis_id) }}"
+       class="action-primary">
+        Print / Download Full Report ↓
+    </a>
+
+    <button type="button"
+            class="action-secondary"
+            onclick="window.print()">
+        Print Report
+    </button>
+
+</section>
+
+    <!-- FOOTER -->
+    <footer class="result-footer">
+
+        <a href="{{ url_for('home') }}" class="result-logo">
+            <span>♥</span> HeartCare <b>AI</b>
+        </a>
+
+        <p>
+            Intelligent ECG Signal Analysis Using Deep Learning
+        </p>
+
+        <span>Academic Research Prototype · 2026</span>
+
+    </footer>
+
+</div>
+
+</body>
+</html>
+
