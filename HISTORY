@@ -1,0 +1,198 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saved Analysis | HeartCare AI</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+<div class="container">
+
+    <header class="navbar">
+        <a href="{{ url_for('home') }}" class="logo">
+            <span>♥</span> HeartCare AI
+        </a>
+        <div class="status">● SAVED ANALYSIS</div>
+    </header>
+
+    <section class="page-heading">
+        <div class="eyebrow">ANALYSIS HISTORY</div>
+        <h1>Saved ECG Analysis</h1>
+        <p class="muted">{{ item['filename'] }}</p>
+    </section>
+
+    <section class="card prediction-card">
+        <h2>Prediction Result</h2>
+
+        <div class="prediction {% if item['predicted_class']|lower == 'normal' %}normal{% else %}abnormal{% endif %}">
+            {{ item['predicted_class'] }}
+        </div>
+
+        <p><strong>Model confidence:</strong> {{ item['confidence'] }}%</p>
+        <p><strong>Normal score:</strong> {{ item['normal_percentage'] }}%</p>
+        <p><strong>Abnormal score:</strong> {{ item['abnormal_percentage'] }}%</p>
+    </section>
+
+    <section class="card">
+        <h2>ECG Signal Information</h2>
+
+        <div class="file-info">
+            <div class="info-item">
+                <small>Sampling Rate</small>
+                <strong>{{ item['sampling_rate'] }} Hz</strong>
+            </div>
+
+            <div class="info-item">
+                <small>Samples</small>
+                <strong>{{ item['samples'] }}</strong>
+            </div>
+
+            <div class="info-item">
+                <small>Duration</small>
+                <strong>{{ item['duration'] }} sec</strong>
+            </div>
+
+            <div class="info-item">
+                <small>Analysis Date</small>
+                <strong>{{ item['created_at'] }}</strong>
+            </div>
+        </div>
+    </section>
+
+    <section class="card">
+        <h2>ECG Waveform</h2>
+
+        <canvas id="waveformCanvas"
+                style="display:block;width:100%;height:230px;
+                       background:#091321;border-radius:12px;">
+        </canvas>
+    </section>
+
+    <section class="card">
+        <h2>Generated CWT Scalogram</h2>
+
+        <img class="scalogram"
+             src="{{ scalogram_url }}"
+             alt="Saved ECG scalogram">
+    </section>
+
+    <div class="actions">
+
+        <a href="{{ url_for('dashboard') }}"
+           class="button primary-button">
+            ← Back to Dashboard
+        </a>
+
+        <a href="{{ url_for('download_report', analysis_id=item['id']) }}"
+           class="button secondary-button">
+            Download PDF Report
+        </a>
+
+    </div>
+
+    <div class="note">
+        Academic research prototype only.
+        This result is not a medical diagnosis.
+    </div>
+
+</div>
+
+<!-- Waveform data -->
+<script id="waveform-data" type="application/json">
+{{ waveform | tojson }}
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const dataElement = document.getElementById("waveform-data");
+    const canvas = document.getElementById("waveformCanvas");
+
+    let waveform = [];
+
+    try {
+        waveform = JSON.parse(dataElement.textContent);
+    } catch (error) {
+        console.error("Unable to read waveform data:", error);
+    }
+
+    const ctx = canvas.getContext("2d");
+
+    function drawWaveform() {
+
+        const ratio = window.devicePixelRatio || 1;
+        const width = canvas.clientWidth;
+        const height = canvas.clientHeight;
+
+        if (!width || !height) return;
+
+        canvas.width = width * ratio;
+        canvas.height = height * ratio;
+
+        ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+        ctx.clearRect(0, 0, width, height);
+
+        // Grid
+        ctx.strokeStyle = "rgba(145,166,192,0.15)";
+        ctx.lineWidth = 1;
+
+        for (let y = 0; y < height; y += 35) {
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(width, y);
+            ctx.stroke();
+        }
+
+        if (!Array.isArray(waveform) || waveform.length < 2) {
+            ctx.fillStyle = "#91a6c0";
+            ctx.font = "14px Arial";
+            ctx.fillText("Waveform data unavailable", 15, 30);
+            return;
+        }
+
+        const values = waveform.map(Number).filter(Number.isFinite);
+
+        if (values.length < 2) return;
+
+        const min = Math.min(...values);
+        const max = Math.max(...values);
+        const range = max - min || 1;
+
+        // ECG waveform
+        ctx.beginPath();
+        ctx.strokeStyle = "#36d9e8";
+        ctx.lineWidth = 2;
+
+        values.forEach(function (value, index) {
+
+            const x = (index / (values.length - 1)) * width;
+
+            const y = height - 15 -
+                ((value - min) / range) * (height - 30);
+
+            if (index === 0) {
+                ctx.moveTo(x, y);
+            } else {
+                ctx.lineTo(x, y);
+            }
+
+        });
+
+        ctx.stroke();
+    }
+
+    drawWaveform();
+
+    window.addEventListener("resize", drawWaveform);
+
+});
+</script>
+
+</body>
+</html>
